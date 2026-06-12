@@ -704,6 +704,14 @@ class RayPPOTrainer(object):
                 # pop those keys for generation
                 gen_batch = batch.pop(batch_keys=['input_ids', 'attention_mask', 'position_ids'])
 
+                # HF rollout 需要 meta_info 中的 eos/pad token id，否则会 KeyError 导致 hang
+                gen_batch.meta_info = {
+                    'eos_token_id': self.tokenizer.eos_token_id,
+                    'pad_token_id': self.tokenizer.pad_token_id,
+                    'do_sample': True,
+                    'temperature': self.config.actor_rollout_ref.rollout.temperature,
+                }
+
                 ####################
                 # original code here
 

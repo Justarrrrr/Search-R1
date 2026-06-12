@@ -18,16 +18,23 @@ from .base import BaseShardingManager
 from .fsdp_ulysses import FSDPUlyssesShardingManager
 
 AllGatherPPModel = None
+MegatronVLLMShardingManager = None
+FSDPVLLMShardingManager = None
 
+# 注：原实现仅以 is_vllm_available() 决定是否 import，但 verl 自带的
+# verl/third_party/vllm 只支持 vllm 0.3.1/0.4.2/0.5.4/0.6.3，遇到更新版本（如 0.10.x）
+# 会在 import 阶段抛 ValueError。这里做兼容处理：
+# 当前只跑 hf rollout 路径，FSDP/Megatron VLLM 适配层加载失败不应阻塞主流程。
 if is_megatron_core_available() and is_vllm_available():
-    from .megatron_vllm import AllGatherPPModel, MegatronVLLMShardingManager
-elif AllGatherPPModel is not None:
-    pass
-else:
-    AllGatherPPModel = None
-    MegatronVLLMShardingManager = None
+    try:
+        from .megatron_vllm import AllGatherPPModel, MegatronVLLMShardingManager
+    except (ImportError, ValueError) as _e:
+        import warnings
+        warnings.warn(f"[sharding_manager] skip megatron_vllm import: {_e}")
 
 if is_vllm_available():
-    from .fsdp_vllm import FSDPVLLMShardingManager
-else:
-    FSDPVLLMShardingManager = None
+    try:
+        from .fsdp_vllm import FSDPVLLMShardingManager
+    except (ImportError, ValueError) as _e:
+        import warnings
+        warnings.warn(f"[sharding_manager] skip fsdp_vllm import: {_e}")

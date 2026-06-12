@@ -19,6 +19,10 @@ import re
 import os
 import datasets
 
+# 设置 HuggingFace 镜像地址，解决国内访问问题
+os.environ['HF_ENDPOINT'] = 'https://hf-mirror.com'
+os.environ['HF_HUB_DISABLE_TELEMETRY'] = '1'
+
 from verl.utils.hdfs_io import copy, makedirs
 import argparse
 
@@ -49,7 +53,8 @@ if __name__ == '__main__':
 
     data_source = 'nq'
 
-    dataset = datasets.load_dataset('RUC-NLPIR/FlashRAG_datasets', 'nq')
+    # 从本地加载
+    dataset = datasets.load_dataset('/var/lib/container/dataset/yxqiu/projects/Search-R1/data/FlashRAG_datasets/nq')
 
     train_dataset = dataset['train']
     test_dataset = dataset['test']

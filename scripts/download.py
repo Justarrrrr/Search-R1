@@ -1,5 +1,9 @@
+import os
 import argparse
 from huggingface_hub import hf_hub_download
+
+# 设置 HuggingFace 镜像地址，解决国内访问问题
+os.environ['HF_ENDPOINT'] = 'https://hf-mirror.com'
 
 parser = argparse.ArgumentParser(description="Download files from a Hugging Face dataset repository.")
 parser.add_argument("--repo_id", type=str, default="PeterJinGo/wiki-18-e5-index", help="Hugging Face repository ID")
@@ -14,6 +18,7 @@ for file in ["part_aa", "part_ab"]:
         filename=file,  # e.g., "e5_Flat.index"
         repo_type="dataset",
         local_dir=args.save_path,
+        endpoint=os.environ['HF_ENDPOINT']
     )
 
 repo_id = "PeterJinGo/wiki-18-corpus"
@@ -22,4 +27,5 @@ hf_hub_download(
         filename="wiki-18.jsonl.gz",
         repo_type="dataset",
         local_dir=args.save_path,
+        endpoint=os.environ['HF_ENDPOINT']
 )
